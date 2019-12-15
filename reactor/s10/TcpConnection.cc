@@ -68,7 +68,7 @@ void TcpConnection::sendInLoop(const std::string& message)
   loop_->assertInLoopThread();
   ssize_t nwrote = 0;
   // if no thing in output queue, try writing directly
-  if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
+  if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) { //输出缓冲区没有阻塞，此时可以写。::write
     nwrote = ::write(channel_->fd(), message.data(), message.size());
     if (nwrote >= 0) {
       if (implicit_cast<size_t>(nwrote) < message.size()) {
@@ -111,7 +111,7 @@ void TcpConnection::shutdownInLoop()
   if (!channel_->isWriting())
   {
     // we are not writing
-    socket_->shutdownWrite();
+    socket_->shutdownWrite();//一直传到socket
   }
 }
 
@@ -158,7 +158,7 @@ void TcpConnection::handleRead(Timestamp receiveTime)
 void TcpConnection::handleWrite()
 {
   loop_->assertInLoopThread();
-  if (channel_->isWriting()) {
+  if (channel_->isWriting()) { 
     ssize_t n = ::write(channel_->fd(),
                         outputBuffer_.peek(),
                         outputBuffer_.readableBytes());
