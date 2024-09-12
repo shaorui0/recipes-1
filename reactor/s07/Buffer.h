@@ -70,20 +70,20 @@ class Buffer : public muduo::copyable
   // retrieve returns void, to prevent
   // string str(retrieve(readableBytes()), readableBytes());
   // the evaluation of two functions are unspecified
-  void retrieve(size_t len)
+  void retrieve(size_t len)  //逻辑删除已读数据
   {
     assert(len <= readableBytes());
     readerIndex_ += len;
   }
 
-  void retrieveUntil(const char* end)
+  void retrieveUntil(const char* end) //删除到end（end在可读区域内）
   {
     assert(peek() <= end);
     assert(end <= beginWrite());
     retrieve(end - peek());
   }
 
-  void retrieveAll()
+  void retrieveAll() //读写index归位
   {
     readerIndex_ = kCheapPrepend;
     writerIndex_ = kCheapPrepend;
@@ -91,8 +91,8 @@ class Buffer : public muduo::copyable
 
   std::string retrieveAsString()
   {
-    std::string str(peek(), readableBytes());
-    retrieveAll();
+    std::string str(peek(), readableBytes());//读所有可读的，并转为string
+    retrieveAll(); //读完调用
     return str;
   }
 
@@ -150,7 +150,7 @@ class Buffer : public muduo::copyable
   ///
   /// It may implement with readv(2)
   /// @return result of read(2), @c errno is saved
-  ssize_t readFd(int fd, int* savedErrno);
+  ssize_t readFd(int fd, int* savedErrno);//散布读，添加extrabuffer(in stack)
 
  private:
 
